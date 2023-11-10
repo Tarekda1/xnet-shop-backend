@@ -5,15 +5,57 @@ const InventoryItem = require("../models/InventoryItem.model");
 
 const { validationResult } = require("express-validator");
 
+const pageSize = 5;
+
 // Get all tasks
-function getAllProducts(req, res) {
-  Product.find({})
-    .then((products) => {
-      res.status(200).json(products);
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err.message });
+async function getAllProducts(req, res) {
+
+  const page = parseInt(req.query.page, 10) || 1;
+
+  try {
+    const products = await Product.find({}).skip((page - 1) * pageSize)
+      .limit(pageSize);;
+
+    const totalProducts = await Product.countDocuments();
+
+    res.status(200).json({
+      totalPages: Math.ceil(totalProducts / pageSize),
+      products,
     });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+
+}
+
+async function searchProducts(req, res) {
+  console.log(req.query);
+  const searchText = req.query.searchterm;
+  console.log(searchText);
+
+  try {
+    if (searchText !== '') {
+      const products = await Product.find({ name: { $regex: searchText, $options: 'i' } });
+      res.status(200).json({ totalPages: 1, products });
+    }
+    else {
+      const page = 1;
+      const products = await Product.find({}).skip((page - 1) * pageSize)
+        .limit(pageSize);;
+
+      const totalProducts = await Product.countDocuments();
+
+      res.status(200).json({
+        totalPages: Math.ceil(totalProducts / pageSize),
+        products,
+      });
+    }
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+
 }
 
 //get by id
@@ -39,6 +81,7 @@ async function getProductByBarCode(req, res) {
 // Create a new task
 async function createProduct(req, res) {
   // validate through express validator
+  console.log(req.body);
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -76,9 +119,16 @@ async function updateProductById(req, res) {
   try {
     console.log(req.params.id);
     console.log(req.body);
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const product = await Product.findById(req.params.id);
+
+    const image = product.image;
+
+    const updated = await Product.findByIdAndUpdate(req.params.id, { ...req.body, image }, {
       new: true,
     });
+
+    console.log(req.file);
+    console.log(updated.image);
 
     if (req.file) {
       // If an image was uploaded, save its URL
@@ -100,14 +150,19 @@ async function updateProductById(req, res) {
 }
 
 // delete product by id
-function deleteProductById(req, res) {
-  Product.findByIdAndRemove(req.params.id, (err, product) => {
-    if (err) {
+async function deleteProductById(req, res) {
+  try {
+    const resp = await Product.findByIdAndRemove(req.params.id);
+    console.log(resp);
+    if (resp.error) {
       res.status(404).json({ error: "Product not found" });
     } else {
-      res.status(204).send(); // 204 No Content
+      res.status(200).json({ status: 204, success: "ok" }); // 204 No Content
     }
-  });
+  } catch (error) {
+    res.status(400).send({ status: 400, success: "ok" }); // 204 No Content
+  }
+
 }
 
 module.exports = {
@@ -117,4 +172,5 @@ module.exports = {
   updateProductById: updateProductById,
   deleteProductById: deleteProductById,
   getProductByBarCode: getProductByBarCode,
+  searchProducts: searchProducts
 };

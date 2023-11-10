@@ -7,6 +7,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const supplierRoutes = require("./routes/supplier");
 const inventoryRoutes = require("./routes/inventoryRoutes");
 const salesOrderRoutes = require("./routes/salesOrderRoutes");
+const utilRoutes = require("./routes/utilRoutes");
 const authRoutes = require("./routes/authRoutes");
 const database = require("./config/database");
 const cors = require("cors");
@@ -79,6 +80,7 @@ app.use("/api", categoryRoutes);
 app.use("/api", supplierRoutes);
 app.use("/api", inventoryRoutes);
 app.use("/api", salesOrderRoutes);
+app.use("/api", utilRoutes);
 
 // app.post("/api/users", (req, res) => {
 //   const newUser = req.body;

@@ -14,7 +14,7 @@ async function login(req, res) {
     const user = await User.findOne({ username });
 
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ status:401, error: "Invalid credentials" });
     }
 
     // Check if the provided password matches the stored hashed password
@@ -27,7 +27,7 @@ async function login(req, res) {
     // If username and password are valid, generate and return an access token
     const accessToken = generateAccessToken({ userId: user._id });
     const refreshToken = generateRefreshToken({ userId: user._id });
-    res.json({
+    res.status(200).json({
       accessToken,
       refreshToken,
       userId: user._id,
@@ -64,7 +64,7 @@ async function signUp(req, res) {
 
     await newUser.save();
 
-    res.status(201).json({ message: "User registration successful" });
+    res.status(201).json({ sucess:"ok",message: "User registration successful" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error });

@@ -30,6 +30,9 @@ const upload = multer({ storage });
 router.get("/products", requireAuth, productController.getAllProducts);
 
 // Get product by id
+router.get("/products/search", requireAuth, productController.searchProducts);
+
+// Get product by id
 router.get("/products/:id", requireAuth, productController.getProductById);
 
 // Update product by id
@@ -38,6 +41,13 @@ router.put(
   upload.single("image"),
   requireAuth,
   productController.updateProductById
+);
+
+// delete product by id
+router.delete(
+  "/products/:id",
+  requireAuth,
+  productController.deleteProductById
 );
 
 // Create a new product

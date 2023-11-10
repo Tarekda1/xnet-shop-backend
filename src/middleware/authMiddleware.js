@@ -6,7 +6,7 @@ const secretKey = "my-key";
 
 // Generate an access token
 function generateAccessToken(payload) {
-  return jwt.sign(payload, secretKey, { expiresIn: "15m" }); // Access token expires in 15 minutes
+  return jwt.sign(payload, secretKey, { expiresIn: "3d" }); // Access token expires in 15 minutes
 }
 
 // Generate a refresh token
