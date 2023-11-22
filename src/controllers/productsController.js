@@ -5,16 +5,16 @@ const InventoryItem = require("../models/InventoryItem.model");
 
 const { validationResult } = require("express-validator");
 
-const pageSize = 5;
+const pageSize = 20;
 
 // Get all tasks
 async function getAllProducts(req, res) {
-
   const page = parseInt(req.query.page, 10) || 1;
 
   try {
-    const products = await Product.find({}).skip((page - 1) * pageSize)
-      .limit(pageSize);;
+    const products = await Product.find({})
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
 
     const totalProducts = await Product.countDocuments();
 
@@ -22,11 +22,24 @@ async function getAllProducts(req, res) {
       totalPages: Math.ceil(totalProducts / pageSize),
       products,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+}
 
+// Get products count
+async function getAllProductsCount(req, res) {
+  try {
+    const productsCount = await Product.count();
+
+    console.log(productsCount);
+
+    res.status(200).json({
+      totalProducts: productsCount,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
 
 async function searchProducts(req, res) {
@@ -35,14 +48,16 @@ async function searchProducts(req, res) {
   console.log(searchText);
 
   try {
-    if (searchText !== '') {
-      const products = await Product.find({ name: { $regex: searchText, $options: 'i' } });
+    if (searchText !== "") {
+      const products = await Product.find({
+        name: { $regex: searchText, $options: "i" },
+      });
       res.status(200).json({ totalPages: 1, products });
-    }
-    else {
+    } else {
       const page = 1;
-      const products = await Product.find({}).skip((page - 1) * pageSize)
-        .limit(pageSize);;
+      const products = await Product.find({})
+        .skip((page - 1) * pageSize)
+        .limit(pageSize);
 
       const totalProducts = await Product.countDocuments();
 
@@ -51,11 +66,9 @@ async function searchProducts(req, res) {
         products,
       });
     }
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-
 }
 
 //get by id
@@ -94,7 +107,8 @@ async function createProduct(req, res) {
 
   if (req.file) {
     // If an image was uploaded, save its URL
-    newProduct.image = "http://localhost:4000/uploads/" + req.file.filename; // Assuming your server serves static files from the 'uploads' directory
+    newProduct.image =
+      `http://localhost:${process.env.PORT}/uploads/` + req.file.filename; // Assuming your server serves static files from the 'uploads' directory
   }
 
   try {
@@ -123,9 +137,13 @@ async function updateProductById(req, res) {
 
     const image = product.image;
 
-    const updated = await Product.findByIdAndUpdate(req.params.id, { ...req.body, image }, {
-      new: true,
-    });
+    const updated = await Product.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, image },
+      {
+        new: true,
+      }
+    );
 
     console.log(req.file);
     console.log(updated.image);
@@ -162,7 +180,6 @@ async function deleteProductById(req, res) {
   } catch (error) {
     res.status(400).send({ status: 400, success: "ok" }); // 204 No Content
   }
-
 }
 
 module.exports = {
@@ -172,5 +189,6 @@ module.exports = {
   updateProductById: updateProductById,
   deleteProductById: deleteProductById,
   getProductByBarCode: getProductByBarCode,
-  searchProducts: searchProducts
+  searchProducts: searchProducts,
+  getAllProductsCount: getAllProductsCount,
 };
