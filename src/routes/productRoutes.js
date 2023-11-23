@@ -29,6 +29,13 @@ const upload = multer({ storage });
 // Get all products
 router.get("/products", requireAuth, productController.getAllProducts);
 
+// Get last 5 products
+router.get(
+  "/products/lastfiveproducs",
+  requireAuth,
+  productController.getProductLastProducsAdded
+);
+
 // Get all products
 router.get(
   "/products/productscount",

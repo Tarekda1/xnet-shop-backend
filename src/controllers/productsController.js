@@ -31,9 +31,6 @@ async function getAllProducts(req, res) {
 async function getAllProductsCount(req, res) {
   try {
     const productsCount = await Product.count();
-
-    console.log(productsCount);
-
     res.status(200).json({
       totalProducts: productsCount,
     });
@@ -75,6 +72,16 @@ async function searchProducts(req, res) {
 async function getProductById(req, res) {
   try {
     const prod = await Product.findById(req?.params?.id);
+    res.status(200).json(prod);
+  } catch (error) {
+    res.status(404).json({ error: "Product not found" });
+  }
+}
+
+//get last 5 products added
+async function getProductLastProducsAdded(req, res) {
+  try {
+    const prod = await Product.find().sort({ $natural: -1 }).limit(5);
     res.status(200).json(prod);
   } catch (error) {
     res.status(404).json({ error: "Product not found" });
@@ -191,4 +198,5 @@ module.exports = {
   getProductByBarCode: getProductByBarCode,
   searchProducts: searchProducts,
   getAllProductsCount: getAllProductsCount,
+  getProductLastProducsAdded: getProductLastProducsAdded,
 };
