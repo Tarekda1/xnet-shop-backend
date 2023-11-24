@@ -5,7 +5,7 @@ const InventoryItem = require("../models/InventoryItem.model");
 
 const { validationResult } = require("express-validator");
 
-const pageSize = 20;
+const pageSize = 50;
 
 // Get all tasks
 async function getAllProducts(req, res) {
